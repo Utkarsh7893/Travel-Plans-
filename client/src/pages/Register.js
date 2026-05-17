@@ -40,6 +40,12 @@ const Register = () => {
     confirmPassword: "",
     agreeTerms: false,
   });
+  const [fieldErrors, setFieldErrors] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [passwordError, setPasswordError] = useState("");
 
@@ -65,6 +71,29 @@ const Register = () => {
       ...formData,
       [name]: newValue,
     });
+
+    const newErrors = { ...fieldErrors };
+    if (name === "firstName" || name === "lastName") {
+      if (value && (!/^[A-Za-z\s]+$/.test(value) || value.trim().length < 1)) {
+        newErrors[name] = "Name can only contain letters and spaces";
+      } else {
+        newErrors[name] = "";
+      }
+    } else if (name === "email") {
+      if (value && !/^[a-zA-Z0-9][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
+        newErrors.email = "Please enter a valid email address";
+      } else {
+        newErrors.email = "";
+      }
+    } else if (name === "password") {
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+      if (value && !passwordRegex.test(value)) {
+        newErrors.password = "Password must be at least 8 chars with atleast 1 uppercase, 1 lowercase, 1 number, and 1 special char";
+      } else {
+        newErrors.password = "";
+      }
+    }
+    setFieldErrors(newErrors);
 
     // Password match validation
     if (
@@ -109,13 +138,22 @@ const Register = () => {
 
   const isNextDisabled = () => {
     if (activeStep === 0) {
-      return !formData.firstName || !formData.lastName;
+      return (
+        !formData.firstName ||
+        formData.firstName.trim() === "" ||
+        !!fieldErrors.firstName ||
+        !formData.lastName ||
+        formData.lastName.trim() === "" ||
+        !!fieldErrors.lastName
+      );
     } else if (activeStep === 1) {
       return (
         !formData.email ||
+        !!fieldErrors.email ||
         !formData.password ||
+        !!fieldErrors.password ||
         !formData.confirmPassword ||
-        passwordError ||
+        !!passwordError ||
         !formData.agreeTerms
       );
     }
@@ -142,6 +180,8 @@ const Register = () => {
                   autoFocus
                   value={formData.firstName}
                   onChange={handleChange}
+                  error={!!fieldErrors.firstName}
+                  helperText={fieldErrors.firstName}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -154,6 +194,8 @@ const Register = () => {
                   autoComplete="family-name"
                   value={formData.lastName}
                   onChange={handleChange}
+                  error={!!fieldErrors.lastName}
+                  helperText={fieldErrors.lastName}
                 />
               </Grid>
             </Grid>
@@ -174,6 +216,8 @@ const Register = () => {
               autoComplete="email"
               value={formData.email}
               onChange={handleChange}
+              error={!!fieldErrors.email}
+              helperText={fieldErrors.email}
               sx={{ mb: 2 }}
             />
             <TextField
@@ -186,6 +230,8 @@ const Register = () => {
               autoComplete="new-password"
               value={formData.password}
               onChange={handleChange}
+              error={!!fieldErrors.password}
+              helperText={fieldErrors.password}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
