@@ -4,7 +4,8 @@ import { useSelector, useDispatch } from "react-redux";
 import "./Home.css";
 import api from "../services/api";
 import { addTrip } from "../redux/actions/tripActions";
-
+import { FaFacebook, FaInstagram } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 /* ── SVG SCENES ─────────────────────────────────────────────── */
 const SceneIceland = () => (
   <svg
@@ -923,9 +924,15 @@ const Home = () => {
           </div>
 
           <div className="wander-footer-socials">
-            <a href="/">FB</a>
-            <a href="/">IG</a>
-            <a href="/">TW</a>
+            <a href="/" aria-label="Facebook">
+              <FaFacebook />
+            </a>
+            <a href="/" aria-label="Instagram">
+              <FaInstagram />
+            </a>
+            <a href="/" aria-label="Twitter">
+              <FaXTwitter />
+            </a>
           </div>
         </div>
       </footer>
