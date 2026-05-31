@@ -17,7 +17,6 @@ import {
   Stepper,
   Step,
   StepLabel,
-  Grid,
   FormControlLabel,
   Checkbox,
 } from "@mui/material";
@@ -26,9 +25,9 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import CheckCircleOutlineIcon from "@mui/icons-material/TaskAlt";
 import ArrowForwardIcon from "@mui/icons-material/East";
 import ArrowBackIcon from "@mui/icons-material/West";
-import GoogleIcon from "@mui/icons-material/Google";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
+import PrimaryButton from "../components/PrimaryButton";
 
 const Register = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -40,6 +39,13 @@ const Register = () => {
     confirmPassword: "",
     agreeTerms: false,
   });
+  const [fieldErrors, setFieldErrors] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+  });
+
   const [showPassword, setShowPassword] = useState(false);
   const [passwordError, setPasswordError] = useState("");
 
@@ -55,6 +61,54 @@ const Register = () => {
     }
   }, [isAuthenticated, navigate]);
 
+  const handleGoogleCallback = (response) => {
+    // Google Sign-In disabled in this commit since googleLogin action
+    // is not present in authActions.js in the current repo.
+    // Keep this handler to avoid runtime errors.
+    console.log("Google callback received", response);
+  };
+
+  useEffect(() => {
+    // Only initialize Google Sign-In if activeStep is 0 (Personal Information / first step)
+    if (activeStep !== 0) return;
+
+    const initializeGoogleSignIn = () => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id:
+            process.env.REACT_APP_GOOGLE_CLIENT_ID ||
+            "643113382684-q82ot662op6kq7fnc1brg3ivclq3pmvk.apps.googleusercontent.com",
+          callback: handleGoogleCallback,
+        });
+
+        const googleBtn = document.getElementById("google-signin-btn");
+        if (googleBtn) {
+          window.google.accounts.id.renderButton(googleBtn, {
+            theme: "outline",
+            size: "large",
+            text: "signup_with",
+            width: isMobile ? 280 : 360,
+          });
+        }
+      }
+    };
+
+    initializeGoogleSignIn();
+
+    const script = document.querySelector(
+      'script[src="https://accounts.google.com/gsi/client"]',
+    );
+    if (script) {
+      script.addEventListener("load", initializeGoogleSignIn);
+    }
+
+    return () => {
+      if (script) {
+        script.removeEventListener("load", initializeGoogleSignIn);
+      }
+    };
+  }, [activeStep, isMobile, dispatch]);
+
   const steps = ["Personal Information", "Account Setup", "Confirmation"];
 
   const handleChange = (e) => {
@@ -66,7 +120,35 @@ const Register = () => {
       [name]: newValue,
     });
 
-    // Password match validation
+    const newErrors = { ...fieldErrors };
+    if (name === "firstName" || name === "lastName") {
+      if (value && (!/^[A-Za-z\s]+$/.test(value) || value.trim().length < 1)) {
+        newErrors[name] = "Name can only contain letters and spaces";
+      } else {
+        newErrors[name] = "";
+      }
+    } else if (name === "email") {
+      if (
+        value &&
+        !/^[a-zA-Z0-9][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
+          value,
+        )
+      ) {
+        newErrors.email = "Please enter a valid email address";
+      } else {
+        newErrors.email = "";
+      }
+    } else if (name === "password") {
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+      if (value && !passwordRegex.test(value)) {
+        newErrors.password =
+          "Password must be at least 8 chars with atleast 1 uppercase, 1 lowercase, 1 number, and 1 special char";
+      } else {
+        newErrors.password = "";
+      }
+    }
+    setFieldErrors(newErrors);
+
     if (
       name === "confirmPassword" ||
       (name === "password" && formData.confirmPassword)
@@ -97,11 +179,14 @@ const Register = () => {
     e.preventDefault();
     if (activeStep === steps.length - 1) {
       const payload = {
-        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        name: `${formData.firstName.trim()} ${formData.lastName.trim()}`.replace(
+          /\s+/g,
+          " ",
+        ),
         email: formData.email,
         password: formData.password,
       };
-      dispatch(register(payload));
+      dispatch(register(payload, navigate));
     } else {
       handleNext();
     }
@@ -109,13 +194,22 @@ const Register = () => {
 
   const isNextDisabled = () => {
     if (activeStep === 0) {
-      return !formData.firstName || !formData.lastName;
+      return (
+        !formData.firstName ||
+        formData.firstName.trim() === "" ||
+        !!fieldErrors.firstName ||
+        !formData.lastName ||
+        formData.lastName.trim() === "" ||
+        !!fieldErrors.lastName
+      );
     } else if (activeStep === 1) {
       return (
         !formData.email ||
+        !!fieldErrors.email ||
         !formData.password ||
+        !!fieldErrors.password ||
         !formData.confirmPassword ||
-        passwordError ||
+        !!passwordError ||
         !formData.agreeTerms
       );
     }
@@ -130,33 +224,33 @@ const Register = () => {
             <Typography variant="h6" sx={{ mb: 3 }}>
               Let's get to know you
             </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  autoComplete="given-name"
-                  name="firstName"
-                  required
-                  fullWidth
-                  id="firstName"
-                  label="First Name"
-                  autoFocus
-                  value={formData.firstName}
-                  onChange={handleChange}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  id="lastName"
-                  label="Last Name"
-                  name="lastName"
-                  autoComplete="family-name"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                />
-              </Grid>
-            </Grid>
+            <Box sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
+              <TextField
+                autoComplete="given-name"
+                name="firstName"
+                required
+                fullWidth
+                id="firstName"
+                label="First Name"
+                autoFocus
+                value={formData.firstName}
+                onChange={handleChange}
+                error={!!fieldErrors.firstName}
+                helperText={fieldErrors.firstName}
+              />
+              <TextField
+                required
+                fullWidth
+                id="lastName"
+                label="Last Name"
+                name="lastName"
+                autoComplete="family-name"
+                value={formData.lastName}
+                onChange={handleChange}
+                error={!!fieldErrors.lastName}
+                helperText={fieldErrors.lastName}
+              />
+            </Box>
           </>
         );
       case 1:
@@ -174,6 +268,8 @@ const Register = () => {
               autoComplete="email"
               value={formData.email}
               onChange={handleChange}
+              error={!!fieldErrors.email}
+              helperText={fieldErrors.email}
               sx={{ mb: 2 }}
             />
             <TextField
@@ -186,22 +282,26 @@ const Register = () => {
               autoComplete="new-password"
               value={formData.password}
               onChange={handleChange}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={toggleShowPassword}
-                      edge="end"
-                    >
-                      {showPassword ? (
-                        <VisibilityOffIcon />
-                      ) : (
-                        <VisibilityIcon />
-                      )}
-                    </IconButton>
-                  </InputAdornment>
-                ),
+              error={!!fieldErrors.password}
+              helperText={fieldErrors.password}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={toggleShowPassword}
+                        edge="end"
+                      >
+                        {showPassword ? (
+                          <VisibilityOffIcon />
+                        ) : (
+                          <VisibilityIcon />
+                        )}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
               }}
               sx={{ mb: 2 }}
             />
@@ -220,17 +320,24 @@ const Register = () => {
               sx={{ mb: 2 }}
             />
             <FormControlLabel
+              sx={{
+                alignItems: "flex-start", // Shifts the alignment anchor to the top line
+                mt: 1.5,
+              }}
               control={
                 <Checkbox
                   checked={formData.agreeTerms}
                   onChange={handleChange}
                   name="agreeTerms"
                   color="primary"
-                  required
+                  sx={{
+                    paddingTop: 0,
+                    marginTop: "-2px",
+                  }}
                 />
               }
               label={
-                <Typography variant="body2">
+                <Typography variant="body2" sx={{ lineHeight: 1.5 }}>
                   I agree to the{" "}
                   <Link
                     component={RouterLink}
@@ -248,7 +355,8 @@ const Register = () => {
                     sx={{ fontWeight: 600 }}
                   >
                     Privacy Policy
-                  </Link>
+                  </Link>{" "}
+                  *
                 </Typography>
               }
             />
@@ -303,7 +411,10 @@ const Register = () => {
               "url(https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=2070&auto=format&fit=crop)",
             backgroundSize: "cover",
             backgroundPosition: "center",
-            position: "relative",
+            position: "sticky",
+            top: 0,
+            height: "100vh",
+            alignSelf: "flex-start",
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-end",
@@ -320,13 +431,7 @@ const Register = () => {
               backdropFilter: "blur(2px)",
             }}
           />
-          <Box
-            sx={{
-              position: "relative",
-              p: 6,
-              color: "white",
-            }}
-          >
+          <Box sx={{ position: "relative", p: 6, color: "white" }}>
             <Typography
               variant="h3"
               component="h1"
@@ -337,32 +442,6 @@ const Register = () => {
             <Typography variant="h5" sx={{ mb: 4, maxWidth: "80%" }}>
               Create an account to start planning your next adventure
             </Typography>
-            <Box sx={{ display: "flex", gap: 1, mb: 4 }}>
-              <Box
-                sx={{
-                  width: 12,
-                  height: 12,
-                  bgcolor: "white",
-                  borderRadius: "50%",
-                }}
-              />
-              <Box
-                sx={{
-                  width: 12,
-                  height: 12,
-                  bgcolor: "rgba(255, 255, 255, 0.5)",
-                  borderRadius: "50%",
-                }}
-              />
-              <Box
-                sx={{
-                  width: 12,
-                  height: 12,
-                  bgcolor: "rgba(255, 255, 255, 0.5)",
-                  borderRadius: "50%",
-                }}
-              />
-            </Box>
           </Box>
         </Box>
       )}
@@ -378,13 +457,39 @@ const Register = () => {
           p: 4,
         }}
       >
-        <Box
-          sx={{
-            maxWidth: 480,
-            width: "100%",
-          }}
-        >
-          <Box sx={{ textAlign: "center", mb: 4 }}>
+        <Box sx={{ maxWidth: 480, width: "100%" }}>
+          <Box sx={{ position: "relative", textAlign: "center", mb: 4 }}>
+            {/* Back to Home */}
+            <Box
+              sx={{
+                position: "absolute",
+                left: { xs: 0, sm: -20, md: -50, lg: -80 },
+                top: 0,
+              }}
+            >
+              <Link
+                component={RouterLink}
+                to="/"
+                variant="body2"
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 36,
+                  height: 36,
+                  borderRadius: "50%",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  backgroundColor: "background.paper",
+                  textDecoration: "none",
+                  transition: "0.2s ease",
+                  "&:hover": { backgroundColor: "action.hover" },
+                }}
+              >
+                <ArrowBackIcon sx={{ mr: 0.5, fontSize: 18 }} />
+              </Link>
+            </Box>
+
             <Typography variant="h4" gutterBottom sx={{ fontWeight: 700 }}>
               Create Account
             </Typography>
@@ -413,20 +518,21 @@ const Register = () => {
             <form onSubmit={handleSubmit}>
               <Box sx={{ mb: 4 }}>{getStepContent(activeStep)}</Box>
 
-              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Button
-                  disabled={activeStep === 0}
-                  onClick={handleBack}
-                  startIcon={<ArrowBackIcon />}
-                  sx={{ visibility: activeStep === 0 ? "hidden" : "visible" }}
-                >
-                  Back
-                </Button>
-                <Button
+              <Box sx={{ display: "flex", gap: 2 }}>
+                {activeStep > 0 && (
+                  <Button
+                    onClick={handleBack}
+                    startIcon={<ArrowBackIcon />}
+                    variant="outlined"
+                    sx={{ flex: 1, py: 1.5, borderRadius: 2, fontWeight: 600 }}
+                  >
+                    Back
+                  </Button>
+                )}
+                <PrimaryButton
                   type="submit"
-                  variant="contained"
-                  color="primary"
                   disabled={isNextDisabled()}
+                  sx={{ flex: 1, py: 1.5, borderRadius: 2, fontWeight: 600 }}
                   endIcon={
                     activeStep === steps.length - 1 ? (
                       <HowToRegIcon />
@@ -436,7 +542,7 @@ const Register = () => {
                   }
                 >
                   {activeStep === steps.length - 1 ? "Create Account" : "Next"}
-                </Button>
+                </PrimaryButton>
               </Box>
 
               {activeStep === 0 && (
@@ -448,38 +554,25 @@ const Register = () => {
                   </Divider>
 
                   <Box
-                    sx={{ display: "flex", justifyContent: "center", gap: 2 }}
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 2,
+                    }}
                   >
-                    <Button
-                      variant="outlined"
-                      startIcon={<GoogleIcon />}
-                      sx={{
-                        borderRadius: 2,
-                        py: 1,
-                        flexGrow: 1,
-                        color: "#DB4437",
-                        borderColor: "#DB4437",
-                        "&:hover": {
-                          borderColor: "#DB4437",
-                          backgroundColor: "rgba(219, 68, 55, 0.1)",
-                        },
-                      }}
-                    >
-                      Google
-                    </Button>
+                    <div id="google-signin-btn" />
                     <Button
                       variant="outlined"
                       startIcon={<FacebookIcon />}
+                      disabled
                       sx={{
                         borderRadius: 2,
                         py: 1,
-                        flexGrow: 1,
+                        width: isMobile ? 280 : 360,
                         color: "#4267B2",
                         borderColor: "#4267B2",
-                        "&:hover": {
-                          borderColor: "#4267B2",
-                          backgroundColor: "rgba(66, 103, 178, 0.1)",
-                        },
+                        opacity: 0.5,
                       }}
                     >
                       Facebook

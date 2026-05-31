@@ -14,6 +14,7 @@ import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import SharedTripView from "./pages/dashboard/SharedTripView";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
@@ -32,7 +33,6 @@ function App() {
         <Router>
           <div className="App">
             <Routes>
-              <Route path="/" element={<Home />} />
               <Route
                 path="/dashboard/*"
                 element={
@@ -41,13 +41,13 @@ function App() {
                   </PrivateRoute>
                 }
               />
+              <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/trip/share/:token" element={<SharedTripView />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route
-                path="/reset-password/:token"
-                element={<ResetPassword />}
-              />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/shared-trip/:token" element={<SharedTripView />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>

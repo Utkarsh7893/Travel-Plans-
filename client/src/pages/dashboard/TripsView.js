@@ -24,6 +24,7 @@ import AddIcon from "@mui/icons-material/Add";
 import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import WalletIcon from "@mui/icons-material/Wallet";
+import PrimaryButton from "../../components/PrimaryButton";
 import { getTrips, addTrip } from "../../redux/actions/tripActions";
 import api from "../../services/api";
 
@@ -117,15 +118,13 @@ const TripsView = () => {
             {trips?.length || 0} trips so far
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          color="primary"
+        <PrimaryButton
           startIcon={<AddIcon />}
           onClick={() => setOpen(true)}
           sx={{ borderRadius: 3, px: 3 }}
         >
           New Trip
-        </Button>
+        </PrimaryButton>
       </Box>
 
       {/* Filter Chips */}
@@ -176,46 +175,49 @@ const TripsView = () => {
                   {...params}
                   label="Destination *"
                   name="destination"
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <React.Fragment>
-                        {loadingOpts ? (
-                          <CircularProgress color="inherit" size={20} />
-                        ) : null}
-                        {params?.InputProps?.endAdornment}
-                      </React.Fragment>
-                    ),
+                  slotProps={{
+                    ...params.slotProps,
+                    input: {
+                      ...params.slotProps?.input,
+                      endAdornment: (
+                        <React.Fragment>
+                          {loadingOpts ? (
+                            <CircularProgress color="inherit" size={20} />
+                          ) : null}
+                          {params.slotProps?.input?.endAdornment}
+                        </React.Fragment>
+                      ),
+                    },
                   }}
                 />
               )}
             />
             <Grid container spacing={2}>
-              <Grid item xs={6}>
+              <Grid xs={6}>
                 <TextField
                   fullWidth
                   name="startDate"
                   label="Start Date *"
                   type="date"
-                  InputLabelProps={{ shrink: true }}
+                  slotProps={{ inputLabel: { shrink: true } }}
                   value={formData.startDate}
                   onChange={handleChange}
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid xs={6}>
                 <TextField
                   fullWidth
                   name="endDate"
                   label="End Date *"
                   type="date"
-                  InputLabelProps={{ shrink: true }}
+                  slotProps={{ inputLabel: { shrink: true } }}
                   value={formData.endDate}
                   onChange={handleChange}
                 />
               </Grid>
             </Grid>
             <Grid container spacing={2}>
-              <Grid item xs={6}>
+              <Grid xs={6}>
                 <TextField
                   fullWidth
                   name="budget"
@@ -225,7 +227,7 @@ const TripsView = () => {
                   onChange={handleChange}
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid xs={6}>
                 <TextField
                   fullWidth
                   select
@@ -255,14 +257,9 @@ const TripsView = () => {
           <Button onClick={() => setOpen(false)} color="inherit">
             Cancel
           </Button>
-          <Button
-            onClick={handleSubmit}
-            variant="contained"
-            color="primary"
-            sx={{ px: 3 }}
-          >
+          <PrimaryButton onClick={handleSubmit} sx={{ px: 3 }}>
             Create Trip
-          </Button>
+          </PrimaryButton>
         </DialogActions>
       </Dialog>
 
@@ -270,7 +267,7 @@ const TripsView = () => {
       <Grid container spacing={3}>
         {loading ? (
           Array.from({ length: 3 }).map((_, i) => (
-            <Grid item xs={12} md={6} lg={4} key={i}>
+            <Grid xs={12} md={6} lg={4} key={i}>
               <Paper sx={{ height: 280, borderRadius: 4 }} elevation={0} />
             </Grid>
           ))
@@ -284,7 +281,7 @@ const TripsView = () => {
                   )
                 : 0;
             return (
-              <Grid item xs={12} md={6} lg={4} key={trip._id}>
+              <Grid xs={12} md={6} lg={4} key={trip._id}>
                 <Card
                   elevation={0}
                   sx={{
@@ -381,7 +378,7 @@ const TripsView = () => {
             );
           })
         ) : (
-          <Grid item xs={12}>
+          <Grid xs={12}>
             <Paper
               sx={{
                 p: 6,
@@ -398,14 +395,13 @@ const TripsView = () => {
               <Typography variant="h6" color="text.secondary" gutterBottom>
                 {filter === "all" ? "No trips yet!" : `No ${filter} trips`}
               </Typography>
-              <Button
-                variant="contained"
+              <PrimaryButton
                 startIcon={<AddIcon />}
                 onClick={() => setOpen(true)}
                 sx={{ mt: 1 }}
               >
                 Plan Your First Trip
-              </Button>
+              </PrimaryButton>
             </Paper>
           </Grid>
         )}

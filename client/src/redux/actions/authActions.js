@@ -33,7 +33,7 @@ export const loadUser = () => async (dispatch) => {
 };
 
 // Login User
-export const login = (userData) => async (dispatch) => {
+export const login = (userData, navigate) => async (dispatch) => {
   try {
     const res = await api.post("/auth/login", userData);
 
@@ -58,20 +58,12 @@ export const login = (userData) => async (dispatch) => {
 };
 
 // Register User
-export const register = (userData) => async (dispatch) => {
+export const register = (userData, navigate) => async (dispatch) => {
   try {
-    const res = await api.post("/auth/register", userData);
+    await api.post("/auth/register", userData);
 
-    dispatch({
-      type: REGISTER_SUCCESS,
-      payload: res.data,
-    });
-
-    // Set token to local storage
-    localStorage.setItem("token", res.data.token);
-
-    dispatch(loadUser());
-    toast.success("Account created successfully! 🚀");
+    toast.success("Account created successfully! Please log in.");
+    navigate("/login");
   } catch (error) {
     const msg = error.response?.data?.msg || "Registration failed";
     dispatch({

@@ -10,9 +10,8 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/cloud/atlas)
 [![Material UI](https://img.shields.io/badge/MUI-v6-007FFF?style=for-the-badge&logo=mui&logoColor=white)](https://mui.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen?style=for-the-badge&logo=github)](CONTRIBUTING.md)
-[![GSSoC](https://img.shields.io/badge/GSSoC-2026-orange?style=for-the-badge)](https://gssoc.girlscript.tech/)
+[![CI Pipeline](https://img.shields.io/github/actions/workflow/status/DebasmitaBose0/Travel-Plans-/ci.yml?branch=main&style=for-the-badge&label=Build%20Check)](https://github.com/DebasmitaBose0/Travel-Plans-/actions)
+[![Security Scan](https://img.shields.io/badge/Security-Audit--Audit-brightgreen?style=for-the-badge&logo=github-actions)](https://github.com/DebasmitaBose0/Travel-Plans-/actions)
 
 <br />
 
@@ -21,7 +20,7 @@
 
 <br />
 
-[🚀 Live Demo](#-live-demo) · [📖 Docs](#-api-endpoints) · [🐛 Report Bug](../../issues) · [✨ Request Feature](../../issues)
+[🚀 Live Demo](#-live-demo) · [📖 Docs](docs/API_DOCUMENTATION.md) · [🐛 Report Bug](../../issues) · [✨ Request Feature](../../issues)
 
 </div>
 
@@ -42,7 +41,9 @@
 - [🎨 Design Highlights](#-design-highlights)
 - [🔮 Future Enhancements](#-future-enhancements)
 - [🤝 Contributing](#-contributing)
+- [🌟 Contributors](#-contributors)
 - [📄 License](#-license)
+- [👥 Mentors](#-mentors)
 - [👤 Author](#-author)
 
 ---
@@ -261,6 +262,19 @@ cd travel-planner
 
 ### 2. Install Dependencies
 
+> ⚠️ **Important:**  
+> This repository uses separate frontend (`client`) and backend (`server`) environments.
+>
+> Running commands like:
+>
+> ```bash
+> npm run dev
+> ```
+>
+> from the root directory will result in a missing script error.
+>
+> Please install dependencies and run scripts separately inside the `client` and `server` directories.
+
 ```bash
 # Install backend dependencies
 cd server
@@ -322,12 +336,19 @@ Then open your browser at **[http://localhost:3000](http://localhost:3000)** �
 
 ## 🔑 Environment Variables
 
-| Variable          | Required | Description                                                  |
-| ----------------- | :------: | ------------------------------------------------------------ |
-| `PORT`            |    ✅    | Port for the Express server (default: `5000`)                |
-| `MONGO_URI`       |    ✅    | MongoDB connection string (local or Atlas)                   |
-| `JWT_SECRET`      |    ✅    | Secret key for signing JWT tokens (use a long random string) |
-| `WEATHER_API_KEY` |    ✅    | Your free OpenWeatherMap API key                             |
+| Variable          | Required | Description                                                        |
+| ----------------- | :------: | ------------------------------------------------------------------ |
+| `PORT`            |    ✅    | Port for the Express server (default: `5000`)                      |
+| `MONGO_URI`       |    ✅    | MongoDB connection string (local or Atlas)                         |
+| `JWT_SECRET`      |    ✅    | Secret key for signing JWT tokens (use a long random string)       |
+| `WEATHER_API_KEY` |    ✅    | Your free OpenWeatherMap API key                                   |
+| `SMTP_HOST`       |    ❌    | SMTP server host for sending emails (ethereal fallback if omitted) |
+| `SMTP_PORT`       |    ❌    | SMTP server port (default: `587`)                                  |
+| `SMTP_SECURE`     |    ❌    | Use SSL/TLS (`true` or `false`, default: `false`)                  |
+| `SMTP_USER`       |    ❌    | SMTP authentication username credential                            |
+| `SMTP_PASS`       |    ❌    | SMTP authentication password credential                            |
+| `FROM_EMAIL`      |    ❌    | Custom sender email address (default: `noreply@packgo.com`)        |
+| `FROM_NAME`       |    ❌    | Custom sender display name (default: `PackGo`)                     |
 
 ---
 
@@ -337,13 +358,17 @@ Base URL: `http://localhost:5000/api`
 
 ### 🔐 Authentication
 
-| Method | Endpoint                | Description                 | Auth |
-| ------ | ----------------------- | --------------------------- | :--: |
-| `POST` | `/auth/register`        | Register a new user         |  ❌  |
-| `POST` | `/auth/login`           | Login and receive JWT token |  ❌  |
-| `GET`  | `/auth/profile`         | Get current user profile    |  ✅  |
-| `PUT`  | `/auth/profile`         | Update user profile         |  ✅  |
-| `PUT`  | `/auth/change-password` | Change password             |  ✅  |
+| Method | Endpoint                     | Description                                      | Auth |
+| ------ | ---------------------------- | ------------------------------------------------ | :--: |
+| `POST` | `/auth/register`             | Register a new user                              |  ❌  |
+| `POST` | `/auth/login`                | Login and receive JWT token                      |  ❌  |
+| `GET`  | `/auth/profile`              | Get current user profile                         |  ✅  |
+| `PUT`  | `/auth/profile`              | Update user profile                              |  ✅  |
+| `PUT`  | `/auth/change-password`      | Change password                                  |  ✅  |
+| `POST` | `/auth/request-email-change` | Initiate profile email update                    |  ✅  |
+| `POST` | `/auth/verify-email-change`  | Confirm and execute pending profile email change |  ✅  |
+| `POST` | `/auth/discard-email-change` | Cancel and discard pending profile email change  |  ✅  |
+| `GET`  | `/auth/email-change-status`  | Query active profile email change status details |  ✅  |
 
 ### 🗺️ Trips
 
@@ -466,15 +491,16 @@ Base URL: `http://localhost:5000/api`
 
 ## 🔒 Security Features
 
-| Feature                | Implementation                                                   |
-| ---------------------- | ---------------------------------------------------------------- |
-| **JWT Authentication** | Stateless tokens with 24h expiry and auto-refresh interceptors   |
-| **Password Hashing**   | bcrypt with configurable salt rounds                             |
-| **Security Headers**   | Helmet.js sets `X-Content-Type-Options`, `X-Frame-Options`, etc. |
-| **Rate Limiting**      | 100 requests per 15 minutes per IP via `express-rate-limit`      |
-| **CORS Policy**        | Configured to allow only specified origins                       |
-| **Input Validation**   | Server-side validation on all user-submitted data                |
-| **Protected Routes**   | Frontend `<PrivateRoute>` + backend `auth` middleware guard      |
+| Feature                | Implementation                                                                      |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| **JWT Authentication** | Stateless tokens with 24h expiry and auto-refresh interceptors                      |
+| **Password Hashing**   | bcrypt with configurable salt rounds                                                |
+| **Security Headers**   | Helmet.js sets `X-Content-Type-Options`, `X-Frame-Options`, etc.                    |
+| **Rate Limiting**      | 100 requests per 15 minutes per IP via `express-rate-limit`                         |
+| **OTP Rate Limiting**  | 60s resend cooldown, 5 max attempts, and a 24h security lockout (`otpBlockedUntil`) |
+| **CORS Policy**        | Configured to allow only specified origins                                          |
+| **Input Validation**   | Server-side validation on all user-submitted data                                   |
+| **Protected Routes**   | Frontend `<PrivateRoute>` + backend `auth` middleware guard                         |
 
 ---
 
@@ -511,6 +537,7 @@ We ❤️ contributions from the community! PackGo is an open-source project and
 Please read our:
 
 - 📋 [**Contributing Guidelines**](CONTRIBUTING.md) — branching strategy, commit message format, PR checklist
+- 🎓 [**Mentor Guidelines**](MENTOR_GUIDELINES.md) — instructions and expectations for GSSoC '26 Mentors
 - 🤝 [**Code of Conduct**](CODE_OF_CONDUCT.md) — community standards and expectations
 
 ### Quick Steps
@@ -536,10 +563,47 @@ git push origin feature/your-amazing-feature
 
 ---
 
+## 🌟 Contributors
+
+<div align="center">
+
+Thanks to these amazing people who have contributed to **PackGo** ✨
+
+[![Contributors](https://contrib.rocks/image?repo=hitesh-kumar123/Travel-Plans-)](https://github.com/hitesh-kumar123/Travel-Plans-/graphs/contributors)
+
+</div>
+
+---
+
+## 📊 Project Support
+
+<div align="center">
+
+[![GitHub Stars](https://img.shields.io/github/stars/hitesh-kumar123/Travel-Plans-?style=for-the-badge&logo=github&label=Stars&color=yellow)](https://github.com/hitesh-kumar123/Travel-Plans-/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/hitesh-kumar123/Travel-Plans-?style=for-the-badge&logo=github&label=Forks&color=blue)](https://github.com/hitesh-kumar123/Travel-Plans-/network/members)
+[![GitHub Issues](https://img.shields.io/github/issues/hitesh-kumar123/Travel-Plans-?style=for-the-badge&logo=github&label=Issues&color=red)](https://github.com/hitesh-kumar123/Travel-Plans-/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/hitesh-kumar123/Travel-Plans-?style=for-the-badge&logo=github&label=PRs&color=brightgreen)](https://github.com/hitesh-kumar123/Travel-Plans-/pulls)
+
+⭐ **Star this repo to show your support and help others discover PackGo!** ⭐
+
+</div>
+
+---
+
 ## 📄 License
 
 This project is licensed under the **MIT License**.  
 See the [LICENSE](LICENSE) file for full details.
+
+---
+
+## 👥 Mentors
+
+We are incredibly grateful to our mentors for their valuable support and code reviews:
+
+- **Mrigakshi Rathore** — GSSoC'26 Mentor
+  - [![GitHub](https://img.shields.io/badge/GitHub-Mrigakshi--Rathore-181717?style=flat&logo=github)](https://github.com/Mrigakshi-Rathore)
+  - [![LinkedIn](https://img.shields.io/badge/LinkedIn-Mrigakshi--Rathore-0A66C2?style=flat&logo=linkedin)](https://www.linkedin.com/in/mrigakshi-rathore/)
 
 ---
 
@@ -551,8 +615,39 @@ See the [LICENSE](LICENSE) file for full details.
 
 [![GitHub](https://img.shields.io/badge/GitHub-hitesh--kumar123-181717?style=for-the-badge&logo=github)](https://github.com/hitesh-kumar123/Travel-Plans-)
 
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Hitesh--Kumar-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/hitesh-kumar-dev/)
+
 ---
+
 
 ⭐ **If PackGo helped you, please give it a star — it means a lot!** ⭐
 
 </div>
+
+/**
+## ✨ README Improvement Notes
+
+### 📌 Formatting Enhancements Needed
+- Improve heading hierarchy for better readability
+- Ensure consistent spacing between sections
+- Use proper Markdown formatting for code blocks and lists
+- Align all installation and usage steps properly
+
+### 🚀 Suggested Structure Upgrade
+- Introduction
+- Features
+- Tech Stack
+- Installation
+- Usage
+- Project Structure
+- Contribution Guidelines
+- License
+
+### 🛠️ Documentation Improvements
+- Add badges (optional): build, license, contributors
+- Add screenshots for better UI understanding
+- Standardize code blocks for commands
+
+### 🎯 Goal
+Improve onboarding experience for new contributors and users by making README more structured, readable, and professional.
+*/
