@@ -397,7 +397,6 @@ html {
   font-size: 0.95rem;
   color: var(--ocean);
   font-weight: 500;
-  
 }
 
 .wander-sf input {
@@ -412,7 +411,7 @@ html {
 }
 
 .wander-sf input::placeholder {
-  color: #b8c2cc; 
+  color: #b8c2cc;
   font-weight: 400;
   opacity: 1;
 }
@@ -420,7 +419,6 @@ html {
 .wander-page .wander-sf-val.placeholder {
   color: #a7b3bf !important;
 }
-
 
 .wander-search-btn {
   border: none;
@@ -432,24 +430,15 @@ html {
   gap: 0.5rem;
   white-space: nowrap;
   font-family: "DM Sans", sans-serif;
-  background: linear-gradient(
-    135deg,
-    #e8735a 0%,
-    #d95d42 100%
-  ) !important;
+  background: linear-gradient(135deg, #e8735a 0%, #d95d42 100%) !important;
   font-weight: 600 !important;
   transition: all 0.3s ease !important;
 }
 
 .wander-search-btn:hover {
-  background: linear-gradient(
-    135deg,
-    #ef8269,
-    #d95d42
-  );
+  background: linear-gradient(135deg, #ef8269, #d95d42);
   transform: scale(1.03);
   box-shadow: 0 8px 20px rgba(232, 115, 90, 0.35);
-
 }
 
 /* ═══ SECTION COMMON ═══ */
@@ -977,14 +966,14 @@ html {
   }
 
   .wander-page .wander-sf:not(:last-child)::after {
-  content: "";
-  position: absolute;
-  top: 18%;
-  right: 0;
-  width: 1px;
-  height: 64%;
-  background: rgba(15, 45, 64, 0.12);
-}
+    content: "";
+    position: absolute;
+    top: 18%;
+    right: 0;
+    width: 1px;
+    height: 64%;
+    background: rgba(15, 45, 64, 0.12);
+  }
 
   .wander-search-btn {
     width: 100%;
@@ -1095,7 +1084,7 @@ html {
   border-radius: 22px !important;
   overflow: hidden !important;
   width: 100% !important;
-  border: 1px solid rgba(15,45,64,0.10) !important;
+  border: 1px solid rgba(15, 45, 64, 0.1) !important;
   box-shadow:
     0 12px 35px rgba(15, 45, 64, 0.12),
     0 4px 10px rgba(15, 45, 64, 0.06) !important;
@@ -1202,7 +1191,6 @@ html {
     flex: 1 1 100% !important;
     height: 56px !important;
   }
-
 }
 
 @media (max-width: 900px) {
