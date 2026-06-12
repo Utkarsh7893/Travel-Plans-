@@ -89,6 +89,14 @@ html {
   opacity: 1;
 }
 
+.wander-nav-active {
+  color: var(--ocean) !important;
+  opacity: 1 !important;
+  font-weight: 700;
+  border-bottom: 2px solid var(--ocean);
+  padding-bottom: 2px;
+}
+
 .wander-nav-log-in {
   background: transparent;
   border: 1px solid rgba(26, 74, 107, 0.2);
@@ -1098,6 +1106,7 @@ html {
     flex-direction: column;
     width: 100%;
   }
+
   .wander-btn-primary,
   .wander-btn-ghost {
     width: 100%;
@@ -1111,7 +1120,8 @@ html {
 .wander-page .wander-search-bar {
   display: flex !important;
   flex-direction: row !important;
-  grid-template-columns: none !important; /* Disables the broken grid grid structure */
+  grid-template-columns: none !important;
+  /* Disables the broken grid grid structure */
   align-items: center !important;
   justify-content: space-between !important;
   padding: 0 !important;
@@ -1216,12 +1226,15 @@ html {
   .wander-page .wander-search-bar {
     flex-wrap: wrap !important;
   }
+
   .wander-page .wander-sf {
     flex: 1 1 calc(50% - 1px) !important;
   }
+
   .wander-page .wander-sf:nth-child(2) {
     border-right: none !important;
   }
+
   .wander-page .wander-search-btn {
     flex: 1 1 100% !important;
     height: 56px !important;
@@ -1233,6 +1246,7 @@ html {
     flex-direction: column !important;
     align-items: stretch !important;
   }
+
   .wander-page .wander-sf {
     flex: 1 1 100% !important;
     width: 100% !important;
@@ -1241,6 +1255,7 @@ html {
     border-bottom: 1px solid rgba(26, 74, 107, 0.08) !important;
     padding: 1.2rem 1.5rem !important;
   }
+
   .wander-page .wander-search-btn {
     flex: 1 1 100% !important;
     width: 100% !important;
@@ -1251,7 +1266,8 @@ html {
 }
 
 .wander-testi-quote-container {
-  height: 280px; /* Adjust if your cards are taller or shorter */
+  height: 280px;
+  /* Adjust if your cards are taller or shorter */
   overflow: hidden;
   position: relative;
 }
@@ -1264,7 +1280,8 @@ html {
 }
 
 .wander-testi-card-slide {
-  height: 280px; /* Must match container height perfectly */
+  height: 280px;
+  /* Must match container height perfectly */
   display: flex;
   flex-direction: column;
   justify-content: center;
