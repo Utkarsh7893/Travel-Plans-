@@ -20,7 +20,6 @@ import {
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
-import LoginIcon from "@mui/icons-material/Login";
 import PrimaryButton from "../components/PrimaryButton";
 import { FaSpinner } from "react-icons/fa";
 
